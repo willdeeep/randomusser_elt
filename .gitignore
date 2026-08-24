@@ -1,0 +1,13 @@
+# Local environment and variables
+.venv
+.env
+.DS_Store
+
+# Test and linter
+.ruff_cache
+
+# Python cache files
+__pycache__
+
+# dbt files
+dbt/seeds/*.csv
