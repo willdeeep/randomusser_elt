@@ -55,9 +55,6 @@ class ExtractSettings(BaseSettings):
         description="Included data columns/fields to return for each result. Omitted if unset.",
     )
 
-    request_timeout_seconds: float = Field(default=30.0)
-    max_retries: int = Field(default=5)
-
 
 class DbtSettings(BaseSettings):
     """dbt runtime configuration.
