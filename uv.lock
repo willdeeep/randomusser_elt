@@ -855,8 +855,7 @@ wheels = [
 
 [[package]]
 name = "randomuser-elt"
-version = "0.0.1"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "dbt-core" },
     { name = "invoke" },
