@@ -27,7 +27,7 @@ def _run(args: list[str]) -> None:
 @task
 def extract(c: Context) -> None:
     """Fetch the RandomUser CSV and write it to the dbt seed directory."""
-    subprocess.run(["uv", "run", "randomuser_elt"], check=True)
+    _run(["uv", "run", "randomuser_elt"])
 
 
 @task
@@ -58,3 +58,9 @@ def seed(c: Context, full_refresh: bool = False) -> None:
 def clean(c: Context) -> None:
     """dbt clean — remove target/, dbt_packages/, and logs/."""
     _run(["uv", "run", "dbt", "clean"])
+
+
+@task
+def build(c: Context) -> None:
+    """dbt build — run models and tests together, in DAG order."""
+    _run(["uv", "run", "dbt", "build"])
