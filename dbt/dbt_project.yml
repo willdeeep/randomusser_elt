@@ -1,0 +1,19 @@
+# Configure how dbt models should be built by default
+name: 'randomuser_elt'  # The name of your dbt project — lowercase only, no spaces or dashes
+version: '0.1.0'  # The version of your project — helpful for packaging and deployment
+config-version: 2  # Required config version — leave this as 2 for all modern dbt projects
+
+profile: 'randomuser_elt'  # This links your project to a profile in ~/.dbt/profiles.yml (must match the profile name exactly)
+
+# Define where dbt should look for different types of files in your project
+model-paths: ["models"]        # Folder where dbt will find your model SQL files
+analysis-paths: ["analyses"]   # For .sql files that generate analysis (not materialized)
+test-paths: ["tests"]          # Custom data tests can be stored here
+seed-paths: ["seeds"]          # Static CSV data files used to populate raw tables
+macro-paths: ["macros"]        # Jinja macros — reusable functions for SQL logic
+snapshot-paths: ["snapshots"]  # For slowly changing dimension tracking (SCD)
+
+clean-targets:                 # These folders are deleted when running `dbt clean`
+  - "target"                   # Contains compiled SQL, manifest, run logs — always safe to delete
+  - "dbt_packages"             # Contains dependencies from `packages.yml`
+  - "logs"                     # Contains logs from dbt runs — can be deleted to clear space
