@@ -17,3 +17,12 @@ clean-targets:                 # These folders are deleted when running `dbt cle
   - "target"                   # Contains compiled SQL, manifest, run logs — always safe to delete
   - "dbt_packages"             # Contains dependencies from `packages.yml`
   - "logs"                     # Contains logs from dbt runs — can be deleted to clear space
+
+models:
+  randomuser_elt:
+    staging:
+      +materialized: view
+    core:
+      +materialized: table
+    marts:
+      +materialized: view
