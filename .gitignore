@@ -11,3 +11,14 @@ __pycache__
 
 # dbt files
 dbt/seeds/*.csv
+dbt/seeds/backup/*.bkp
+dbt/logs/
+dbt/dbt_packages
+dbt/.user.yml
+dbt/target
+
+# Database
+dbt/data/randomuser.db
+
+# Transient lists and plan files
+docs/*
