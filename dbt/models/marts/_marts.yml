@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: mart_recent_registrations_by_state
+    description: "The 3 most recently registered users per state. Grain: one row per (state, rank)."
+    columns:
+      - name: state_registration_rank
+        description: "1 = most recent registration in that state. Ties broken by user_id."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3]
+                quote: false
