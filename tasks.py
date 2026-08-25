@@ -8,12 +8,19 @@ from invoke import Context, task
 
 ROOT = Path(__file__).parent
 ENV_FILE = ROOT / ".env"
+DBT_DIR = ROOT / "dbt"
 
 
 def _run(args: list[str]) -> None:
     """Run *args* from the repo root with ``.env`` auto-loaded; stream output, raise on failure."""
     env_file = shlex.quote(str(ENV_FILE))
-    prefix = f"set -a; [ -f {env_file} ] && . {env_file}; set +a; "
+    dbt_dir = shlex.quote(str(DBT_DIR))
+    prefix = (
+        f"set -a; [ -f {env_file} ] && . {env_file}; set +a; "
+        # dbt clean compares DBT_PROJECT_DIR against resolved absolute paths, so a relative
+        # value (as set in .env) makes it wrongly flag clean-targets as "outside the project".
+        f"export DBT_PROJECT_DIR={dbt_dir} DBT_PROFILES_DIR={dbt_dir}; "
+    )
     subprocess.run(["bash", "-c", prefix + shlex.join(args)], cwd=ROOT, check=True)
 
 
@@ -45,3 +52,9 @@ def deps(c: Context) -> None:
 def seed(c: Context, full_refresh: bool = False) -> None:
     """dbt seed — load CSV seeds into the SQLite database."""
     _run(["uv", "run", "dbt", "seed", *(["--full-refresh"] if full_refresh else [])])
+
+
+@task
+def clean(c: Context) -> None:
+    """dbt clean — remove target/, dbt_packages/, and logs/."""
+    _run(["uv", "run", "dbt", "clean"])
