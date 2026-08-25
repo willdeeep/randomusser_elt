@@ -7,7 +7,8 @@ license = { text = "MIT" }
 requires-python = ">=3.14"
 authors = [{ name = "willdeeep" }]
 dependencies = [
-    "dbt-core>=1.12",
+    "dbt-core~=1.10.0",
+    "dbt-sqlite~=1.10.0",
     "requests>=2.34.2",
     "pydantic>=2.10",
     "pydantic-settings>=2.7",
@@ -20,6 +21,13 @@ dependencies = [
 
 [project.scripts]
 randomuser_elt = "randomuser_elt.__main__:main"
+
+[tool.uv]
+# dbt-core 1.10.x/1.11.x (the only line dbt-sqlite's dbt-adapters~=1.16.0 pin
+# supports) caps mashumaro<3.15, which predates Python 3.14 support (added in
+# mashumaro 3.17). Override so uv resolves a mashumaro that actually works on
+# this project's Python version instead of the stale upstream cap.
+override-dependencies = ["mashumaro[msgpack]>=3.17"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
