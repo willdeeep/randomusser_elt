@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: dim_timezone
+    description: "One row per distinct UTC offset observed in the seed."
+    columns:
+      - name: tz_offset
+        description: "Timezone offset from UTC (e.g., -05:00, +01:00). Natural key."
+        data_tests:
+          - unique
+          - not_null
+      - name: tz_description
+        description: "Name or description of the timezone."
+        data_tests:
+          - not_null
+
+  - name: dim_location
+    description: "One row per distinct address."
+    columns:
+      - name: location_id
+        description: "Generated surrogate key, row_number() ordered by address fields."
+        data_tests:
+          - unique
+          - not_null
+      - name: tz_offset
+        description: "FK to dim_timezone."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_timezone')
+                field: tz_offset
+
+  - name: dim_user
+    description: "One row per person."
+    columns:
+      - name: user_id
+        description: "Generated surrogate key, row_number() ordered by email."
+        data_tests:
+          - unique
+          - not_null
+      - name: email
+        description: "Email address for the user. Not guaranteed unique — see seeds/_seeds.yml. user_id is the person-grain uniqueness guarantee."
+        data_tests:
+          - not_null
+      - name: gender
+        description: "Text-based user gender category."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['male', 'female']
+      - name: location_id
+        description: "FK to dim_location."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_location')
+                field: location_id
