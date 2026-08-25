@@ -1,0 +1,108 @@
+version: 2
+
+seeds:
+  - name: randomuser
+    description: "A list of randomuser profiles."
+    config:
+      column_types:
+        gender: "text"
+        "name.title": "text"
+        "name.first": "text"
+        "name.last": "text"
+        "location.street.number": "integer"
+        "location.street.name": "text"
+        "location.city": "text"
+        "location.state": "text"
+        "location.country": "text"
+        "location.postcode": "text"
+        "location.coordinates.latitude": "real"
+        "location.coordinates.longitude": "real"
+        "location.timezone.offset": "text"
+        "location.timezone.description": "text"
+        email: "text"
+        "dob.date": "text"  # Stores the timezone-aware timestamp string safely
+        "dob.age": "integer"
+        "registered.date": "text" # Stores the timezone-aware timestamp string safely
+        "registered.age": "integer"
+        "id.name": "text"
+        "id.value": "text"
+
+    columns:
+      - name: gender
+        description: "Text-based user gender category"
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['male', 'female']
+      - name: '"name.title"'
+        description: "Honorific or title of the user (e.g., Mr, Ms, Dr)"
+        data_tests:
+          - not_null
+
+      - name: '"name.first"'
+        description: "The user's first name"
+        data_tests:
+          - not_null
+
+      - name: '"name.last"'
+        description: "The user's last name"
+        data_tests:
+          - not_null
+
+      - name: '"location.street.number"'
+        description: "Street number of the user's address"
+
+      - name: '"location.street.name"'
+        description: "Street name of the user's address"
+
+      - name: '"location.city"'
+        description: "City of residence"
+
+      - name: '"location.state"'
+        description: "State or province of residence"
+
+      - name: '"location.country"'
+        description: "Country of residence"
+
+      - name: '"location.postcode"'
+        description: "Postal or zip code (stored as text to retain alphanumeric formatting and leading zeros)"
+
+      - name: '"location.coordinates.latitude"'
+        description: "Geographic latitude coordinate"
+
+      - name: '"location.coordinates.longitude"'
+        description: "Geographic longitude coordinate"
+
+      - name: '"location.timezone.offset"'
+        description: "Timezone offset from UTC (e.g., -05:00, +01:00)"
+
+      - name: '"location.timezone.description"'
+        description: "Name or description of the timezone"
+
+      - name: email
+        description: "Unique email address for the user"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: '"dob.date"'
+        description: "UTC timestamp string for the D.O.B."
+        data_tests:
+          - not_null
+
+      - name: '"dob.age"'
+        description: "Calculated current age of the user in years"
+
+      - name: '"registered.date"'
+        description: "UTC timestamp string indicating when the user profile was created"
+        data_tests:
+          - not_null
+
+      - name: '"registered.age"'
+        description: "Number of years the user has been registered with the database"
+
+      - name: '"id.name"'
+        description: "Type of identification provided (e.g., SSN, Passport ID)"
+
+      - name: '"id.value"'
+        description: "The specific identification alphanumeric token value"
