@@ -24,8 +24,6 @@ seeds:
         "dob.age": "integer"
         "registered.date": "text" # Stores the timezone-aware timestamp string safely
         "registered.age": "integer"
-        "id.name": "text"
-        "id.value": "text"
 
     columns:
       - name: gender
@@ -100,9 +98,3 @@ seeds:
 
       - name: '"registered.age"'
         description: "Number of years the user has been registered with the database"
-
-      - name: '"id.name"'
-        description: "Type of identification provided (e.g., SSN, Passport ID)"
-
-      - name: '"id.value"'
-        description: "The specific identification alphanumeric token value"
