@@ -78,10 +78,9 @@ seeds:
         description: "Name or description of the timezone"
 
       - name: email
-        description: "Unique email address for the user"
+        description: "Email address for the user. Not guaranteed unique — the synthetic firstname.lastname@example.com generator collides for a handful of rows in this fixed-seed extract."
         data_tests:
           - not_null
-          - unique
 
       - name: '"dob.date"'
         description: "UTC timestamp string for the D.O.B."
