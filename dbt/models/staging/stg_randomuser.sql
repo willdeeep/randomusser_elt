@@ -1,0 +1,21 @@
+select
+    gender,
+    "name.title" as title,
+    "name.first" as first_name,
+    "name.last" as last_name,
+    "location.street.number" as street_number,
+    "location.street.name" as street_name,
+    "location.city" as city,
+    "location.state" as state,
+    "location.country" as country,
+    "location.postcode" as postcode,
+    "location.coordinates.latitude" as latitude,
+    "location.coordinates.longitude" as longitude,
+    "location.timezone.offset" as tz_offset,
+    "location.timezone.description" as tz_description,
+    email,
+    "dob.date" as dob_date,
+    "dob.age" as dob_age,
+    "registered.date" as registered_date,
+    "registered.age" as registered_age
+from {{ ref('randomuser') }}

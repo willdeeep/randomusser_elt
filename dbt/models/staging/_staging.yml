@@ -5,10 +5,9 @@ models:
     description: "Typed, renamed pass-through of the randomuser seed. Grain: one row per person."
     columns:
       - name: email
-        description: "Unique email address for the user."
+        description: "Email address for the user. Not guaranteed unique — see seeds/_seeds.yml."
         data_tests:
           - not_null
-          - unique
       - name: gender
         description: "Text-based user gender category."
         data_tests:
