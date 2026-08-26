@@ -5,6 +5,10 @@
 
 # Test and linter
 .ruff_cache
+.coverage
+.pytest_cache
+.mypy_cache
+.vscode
 
 # Python cache files
 __pycache__

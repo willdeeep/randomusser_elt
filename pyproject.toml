@@ -33,6 +33,11 @@ override-dependencies = ["mashumaro[msgpack]>=3.17"]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/randomuser_elt"]
 
@@ -52,9 +57,18 @@ python_version = "3.14"
 strict = true
 files = ["src", "tests","tasks.py"]
 
+[[tool.mypy.overrides]]
+# invoke ships py.typed but doesn't declare __all__, so strict mode's
+# no-implicit-reexport flags its own public API (Context, task) as undefined.
+module = "invoke"
+implicit_reexport = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --cov=migration_pipeline --cov-report=term-missing"
+addopts = "-ra -m \"not integration\" --cov=randomuser_elt --cov-report=term-missing --cov-fail-under=80"
 markers = [
     "integration: tests that hit external services or fixtures of them",
 ]
+
+[tool.coverage.report]
+exclude_lines = ["if __name__ == .__main__.:"]
