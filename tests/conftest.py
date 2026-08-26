@@ -30,9 +30,8 @@ def isolate_test_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
 
     Applies to every test in the suite so the real .env file and any ambient
     environment variable (e.g. loaded by an IDE's env-file setting) can never
-    leak into a test, and so a test's pass/fail depends only on what it itself
-    sets up -- see docs/review/test-config-review.md for the leakage bug this
-    was written to close.
+    leak into a test, and so a test's pass/fail depends only on what confftest 
+    and the test itself sets up.
     """
     monkeypatch.chdir(tmp_path)
     for var in _OPTIONAL_VARS:
