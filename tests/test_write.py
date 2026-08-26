@@ -11,15 +11,9 @@ import pytest
 from randomuser_elt.write import seed_response_csv
 
 
-@pytest.fixture(autouse=True)
-def _isolated_cwd(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
-    monkeypatch.chdir(tmp_path)
-    return tmp_path
-
-
 @pytest.fixture
-def _seed_dir(_isolated_cwd: Path) -> Path:
-    seed_dir = _isolated_cwd / "dbt" / "seeds"
+def _seed_dir(isolate_test_environment: Path) -> Path:
+    seed_dir = isolate_test_environment / "dbt" / "seeds"
     seed_dir.mkdir(parents=True)
     return seed_dir
 

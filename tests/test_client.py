@@ -76,7 +76,6 @@ def _http_error(status_code: int) -> requests.exceptions.HTTPError:
 def test_get_randomuser_response_returns_response_on_success(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
     ok_response = MagicMock(status_code=200)
     ok_response.raise_for_status.return_value = None
     monkeypatch.setattr("randomuser_elt.client.requests.get", MagicMock(return_value=ok_response))
@@ -89,8 +88,6 @@ def test_get_randomuser_response_returns_response_on_success(
 def test_get_randomuser_response_retries_then_succeeds(
     monkeypatch: pytest.MonkeyPatch, _no_real_sleep: None
 ) -> None:
-    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
-
     failing_response = MagicMock(status_code=500)
     failing_response.raise_for_status.side_effect = _http_error(500)
     ok_response = MagicMock(status_code=200)
@@ -108,8 +105,6 @@ def test_get_randomuser_response_retries_then_succeeds(
 def test_get_randomuser_response_reraises_after_exhausting_retries(
     monkeypatch: pytest.MonkeyPatch, _no_real_sleep: None
 ) -> None:
-    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
-
     failing_response = MagicMock(status_code=500)
     failing_response.raise_for_status.side_effect = _http_error(500)
     mock_get = MagicMock(return_value=failing_response)
@@ -124,7 +119,6 @@ def test_get_randomuser_response_reraises_after_exhausting_retries(
 def test_get_randomuser_response_logs_request_params(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
     ok_response = MagicMock(status_code=200)
     ok_response.raise_for_status.return_value = None
     monkeypatch.setattr("randomuser_elt.client.requests.get", MagicMock(return_value=ok_response))
@@ -140,8 +134,6 @@ def test_get_randomuser_response_logs_warning_on_retry(
     caplog: pytest.LogCaptureFixture,
     _no_real_sleep: None,
 ) -> None:
-    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
-
     failing_response = MagicMock(status_code=500)
     failing_response.raise_for_status.side_effect = _http_error(500)
     ok_response = MagicMock(status_code=200)
