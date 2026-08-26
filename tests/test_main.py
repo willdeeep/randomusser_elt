@@ -29,3 +29,30 @@ def test_main_configures_logging_before_running(monkeypatch: pytest.MonkeyPatch)
     main()
 
     basic_config_mock.assert_called_once()
+
+
+def test_main_propagates_fetch_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "randomuser_elt.__main__.get_randomuser_response",
+        MagicMock(side_effect=ConnectionError("fetch failed")),
+    )
+    write_mock = MagicMock()
+    monkeypatch.setattr("randomuser_elt.__main__.seed_response_csv", write_mock)
+
+    with pytest.raises(ConnectionError, match="fetch failed"):
+        main()
+
+    write_mock.assert_not_called()
+
+
+def test_main_propagates_write_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "randomuser_elt.__main__.get_randomuser_response", MagicMock(return_value="resp")
+    )
+    monkeypatch.setattr(
+        "randomuser_elt.__main__.seed_response_csv",
+        MagicMock(side_effect=PermissionError("write failed")),
+    )
+
+    with pytest.raises(PermissionError, match="write failed"):
+        main()
