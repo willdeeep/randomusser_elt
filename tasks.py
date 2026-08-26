@@ -10,10 +10,20 @@ from randomuser_elt.config import load_dbt_settings
 
 ROOT = Path(__file__).parent
 ENV_FILE = ROOT / ".env"
+# Mirrors profiles.yml's schemas_and_paths.main -- not exposed via DbtSettings,
+# since that only covers where dbt_project.yml/profiles.yml themselves live.
+DB_PATH = ROOT / "dbt" / "data" / "randomuser.db"
 
 
-def _run(args: list[str]) -> None:
+def _run(args: list[str], *, ensure_db_dir: bool = True) -> None:
     """Run *args* from the repo root with ``.env`` auto-loaded; stream output, raise on failure."""
+    if ensure_db_dir:
+        # dbt/data/ holds nothing but the gitignored .db file, so a fresh clone never has it
+        # on disk -- sqlite3.connect() doesn't create missing parent directories, so without
+        # this the first dbt command any task runs fails with "unable to open database file".
+        # Skipped for `clean`, which has no reason to create state it doesn't touch.
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+
     dbt_settings = load_dbt_settings()
     project_dir = shlex.quote(str((ROOT / dbt_settings.project_dir).resolve()))
     profiles_dir = shlex.quote(str((ROOT / dbt_settings.profiles_dir).resolve()))
@@ -60,10 +70,16 @@ def seed(c: Context, full_refresh: bool = False) -> None:
 @task
 def clean(c: Context) -> None:
     """dbt clean — remove target/, dbt_packages/, and logs/."""
-    _run(["uv", "run", "dbt", "clean"])
+    _run(["uv", "run", "dbt", "clean"], ensure_db_dir=False)
 
 
 @task
 def build(c: Context) -> None:
     """dbt build — run models and tests together, in DAG order."""
     _run(["uv", "run", "dbt", "build"])
+
+
+@task
+def reset_db(c: Context) -> None:
+    """Delete the SQLite database file so the next seed/build starts completely fresh."""
+    DB_PATH.unlink(missing_ok=True)
