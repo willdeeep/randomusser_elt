@@ -1,6 +1,8 @@
 """Unit tests for randomuser_elt.write."""
 
 import logging
+import os
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -10,14 +12,19 @@ from randomuser_elt.write import seed_response_csv
 
 
 @pytest.fixture(autouse=True)
-def _seed_dir(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+def _isolated_cwd(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     monkeypatch.chdir(tmp_path)
-    seed_dir = tmp_path / "dbt" / "seeds"
+    return tmp_path
+
+
+@pytest.fixture
+def _seed_dir(_isolated_cwd: Path) -> Path:
+    seed_dir = _isolated_cwd / "dbt" / "seeds"
     seed_dir.mkdir(parents=True)
     return seed_dir
 
 
-def test_seed_response_csv_writes_response_text(tmp_path: Path) -> None:
+def test_seed_response_csv_writes_response_text(_seed_dir: Path, tmp_path: Path) -> None:
     response = MagicMock(text="gender,email\nfemale,a@example.com\n")
 
     seed_response_csv(response)
@@ -27,7 +34,7 @@ def test_seed_response_csv_writes_response_text(tmp_path: Path) -> None:
 
 
 def test_seed_response_csv_logs_path_and_byte_count(
-    caplog: pytest.LogCaptureFixture,
+    _seed_dir: Path, caplog: pytest.LogCaptureFixture
 ) -> None:
     response = MagicMock(text="gender,email\nfemale,a@example.com\n")
 
@@ -38,3 +45,28 @@ def test_seed_response_csv_logs_path_and_byte_count(
         "randomuser.csv" in record.message and str(len(response.text)) in record.message
         for record in caplog.records
     )
+
+
+def test_seed_response_csv_raises_file_not_found_when_seed_dir_missing() -> None:
+    """No _seed_dir fixture here -- dbt/seeds/ is never created."""
+    response = MagicMock(text="gender,email\n")
+
+    with pytest.raises(FileNotFoundError):
+        seed_response_csv(response)
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or (hasattr(os, "geteuid") and os.geteuid() == 0),
+    reason="directory write-permission bits aren't enforced the same way on Windows or as root",
+)
+def test_seed_response_csv_raises_permission_error_when_dir_not_writable(
+    _seed_dir: Path,
+) -> None:
+    response = MagicMock(text="gender,email\n")
+    _seed_dir.chmod(0o500)  # read + execute only, no write -- blocks file creation
+
+    try:
+        with pytest.raises(PermissionError):
+            seed_response_csv(response)
+    finally:
+        _seed_dir.chmod(0o700)  # restore so pytest can clean up tmp_path
