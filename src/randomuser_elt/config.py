@@ -11,9 +11,6 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Filtered list of columns required according to spec
-RETURN_COLUMNS: list[str] = ["id", "gender", "name", "location", "email", "dob", "registered"]
-
 
 class ExtractSettings(BaseSettings):
     """Extract runtime configuration.
