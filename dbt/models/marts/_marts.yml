@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: mart_recent_registrations_by_state
-    description: "The 3 most recently registered users per state, ranked by registered_date desc (ties broken by user_id). Rank itself isn't exposed — only the curated presentation columns."
+    description: "The 3 most recently registered US users per state ('state' meaning US state — filtered to country = 'United States' before ranking), ranked by registered_date desc (ties broken by user_id). Rank itself isn't exposed — only the curated presentation columns."
     columns:
       - name: name
         description: "first_name and last_name combined."
@@ -13,9 +13,9 @@ models:
       - name: city
         description: "City of residence."
       - name: state
-        description: "State or province of residence."
+        description: "US state of residence."
       - name: country
-        description: "Country of residence."
+        description: "Country of residence. Always 'United States' — the model filters to it."
       - name: email
         description: "Email address for the user."
       - name: age
