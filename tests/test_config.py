@@ -57,6 +57,33 @@ def test_extract_settings_parses_plain_string_env_var(monkeypatch: pytest.Monkey
     assert settings.source_nat == "gb"
 
 
+def test_extract_settings_parses_results_as_int(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
+    monkeypatch.setenv("EXTRACT_SOURCE_RESULTS", "1000")
+
+    settings = load_extract_settings()
+
+    assert settings.source_results == 1000
+
+
+def test_extract_settings_parses_inc_json_list_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
+    monkeypatch.setenv("EXTRACT_SOURCE_INC", '["gender","email"]')
+
+    settings = load_extract_settings()
+
+    assert settings.source_inc == ["gender", "email"]
+
+
+def test_extract_settings_parses_inc_plain_string_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("EXTRACT_SOURCE_URL", "https://example.test/api/")
+    monkeypatch.setenv("EXTRACT_SOURCE_INC", "gender")
+
+    settings = load_extract_settings()
+
+    assert settings.source_inc == "gender"
+
+
 def test_extract_settings_missing_required_url_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("EXTRACT_SOURCE_URL", raising=False)
 
