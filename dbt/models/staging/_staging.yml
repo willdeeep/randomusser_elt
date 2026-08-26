@@ -4,13 +4,47 @@ models:
   - name: stg_randomuser
     description: "Typed, renamed pass-through of the randomuser seed. Grain: one row per person."
     columns:
-      - name: email
-        description: "Email address for the user. Not guaranteed unique — see seeds/_seeds.yml."
-        data_tests:
-          - not_null
       - name: gender
         description: "Text-based user gender category."
         data_tests:
           - accepted_values:
               arguments:
                 values: ['male', 'female']
+      - name: title
+        description: "Honorific or title of the user (e.g., Mr, Ms, Dr)."
+      - name: first_name
+        description: "The user's first name."
+      - name: last_name
+        description: "The user's last name."
+      - name: street_number
+        description: "Street number of the user's address."
+      - name: street_name
+        description: "Street name of the user's address."
+      - name: city
+        description: "City of residence."
+      - name: state
+        description: "State or province of residence."
+      - name: country
+        description: "Country of residence."
+      - name: postcode
+        description: "Postal or zip code (stored as text to retain alphanumeric formatting and leading zeros)."
+      - name: latitude
+        description: "Geographic latitude coordinate."
+      - name: longitude
+        description: "Geographic longitude coordinate."
+      - name: tz_offset
+        description: "Timezone offset from UTC (e.g., -05:00, +01:00)."
+      - name: tz_description
+        description: "Name or description of the timezone."
+      - name: email
+        description: "Email address for the user. Not guaranteed unique — see seeds/_seeds.yml."
+        data_tests:
+          - not_null
+      - name: dob_date
+        description: "UTC timestamp string for the D.O.B."
+      - name: dob_age
+        description: "Age in whole years as returned by the source API at extraction time."
+      - name: registered_date
+        description: "UTC timestamp string indicating when the user profile was created."
+      - name: registered_age
+        description: "Number of years the user has been registered with the database."
