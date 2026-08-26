@@ -4,9 +4,12 @@ Responsible only for connecting to the source API: builds GET request URL, yield
 Write to seeds lives elsewhere so this stays a thin I/O boundary.
 """
 
+import logging
+
 import requests
 from tenacity import (
     Retrying,
+    before_sleep_log,
     retry_if_exception,
     retry_if_exception_type,
     stop_after_attempt,
@@ -14,6 +17,8 @@ from tenacity import (
 )
 
 from randomuser_elt.config import ExtractSettings, load_extract_settings
+
+logger = logging.getLogger(__name__)
 
 _NETWORK_ERRORS = (requests.exceptions.ConnectionError, requests.exceptions.Timeout)
 _RETRYABLE_STATUS_CODES = {429}  # plus any 5xx, checked separately below
@@ -55,6 +60,7 @@ def _fetch(url: str, params: dict[str, str], timeout: float) -> requests.Respons
 def get_randomuser_response() -> requests.Response:
     settings = load_extract_settings()
     params = _build_params(settings)
+    logger.info("Requesting %s params=%s", settings.source_url, params)
 
     should_retry = retry_if_exception_type(_NETWORK_ERRORS) | retry_if_exception(
         _is_retryable_status
@@ -64,5 +70,6 @@ def get_randomuser_response() -> requests.Response:
         wait=wait_exponential(multiplier=1, min=_BACKOFF_MIN_SECONDS, max=_BACKOFF_MAX_SECONDS),
         retry=should_retry,
         reraise=True,
+        before_sleep=before_sleep_log(logger, logging.WARNING),
     )
     return retryer(_fetch, settings.source_url, params, _TIMEOUT_SECONDS)
