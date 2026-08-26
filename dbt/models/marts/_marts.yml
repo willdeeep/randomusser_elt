@@ -2,12 +2,49 @@ version: 2
 
 models:
   - name: mart_recent_registrations_by_state
-    description: "The 3 most recently registered users per state. Grain: one row per (state, rank)."
+    description: "The 3 most recently registered users per state, ranked by registered_date desc (ties broken by user_id). Rank itself isn't exposed — only the curated presentation columns."
     columns:
-      - name: state_registration_rank
-        description: "1 = most recent registration in that state. Ties broken by user_id."
+      - name: name
+        description: "first_name and last_name combined."
         data_tests:
-          - accepted_values:
-              arguments:
-                values: [1, 2, 3]
-                quote: false
+          - not_null
+      - name: gender
+        description: "Text-based user gender category."
+      - name: city
+        description: "City of residence."
+      - name: state
+        description: "State or province of residence."
+      - name: country
+        description: "Country of residence."
+      - name: email
+        description: "Email address for the user."
+      - name: age
+        description: "Whole years since dob_date, calculated at query time (not the seed's static dob_age)."
+        data_tests:
+          - not_null
+      - name: registered_date
+        description: "UTC timestamp string indicating when the user profile was created."
+
+  - name: mart_user_directory
+    description: "Presentation-layer view: one row per person, curated columns plus a live-calculated age."
+    columns:
+      - name: name
+        description: "first_name and last_name combined."
+        data_tests:
+          - not_null
+      - name: gender
+        description: "Text-based user gender category."
+      - name: city
+        description: "City of residence."
+      - name: state
+        description: "State or province of residence."
+      - name: country
+        description: "Country of residence."
+      - name: email
+        description: "Email address for the user."
+      - name: age
+        description: "Whole years since dob_date, calculated at query time (not the seed's static dob_age)."
+        data_tests:
+          - not_null
+      - name: registered_date
+        description: "UTC timestamp string indicating when the user profile was created."

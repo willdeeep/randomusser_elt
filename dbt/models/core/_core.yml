@@ -22,6 +22,22 @@ models:
         data_tests:
           - unique
           - not_null
+      - name: street_number
+        description: "Street number of the user's address."
+      - name: street_name
+        description: "Street name of the user's address."
+      - name: city
+        description: "City of residence."
+      - name: state
+        description: "State or province of residence."
+      - name: country
+        description: "Country of residence."
+      - name: postcode
+        description: "Postal or zip code (stored as text to retain alphanumeric formatting and leading zeros)."
+      - name: latitude
+        description: "Geographic latitude coordinate."
+      - name: longitude
+        description: "Geographic longitude coordinate."
       - name: tz_offset
         description: "FK to dim_timezone."
         data_tests:
@@ -38,16 +54,36 @@ models:
         data_tests:
           - unique
           - not_null
-      - name: email
-        description: "Email address for the user. Not guaranteed unique — see seeds/_seeds.yml. user_id is the person-grain uniqueness guarantee."
-        data_tests:
-          - not_null
       - name: gender
         description: "Text-based user gender category."
         data_tests:
           - accepted_values:
               arguments:
                 values: ['male', 'female']
+      - name: title
+        description: "Honorific or title of the user (e.g., Mr, Ms, Dr)."
+      - name: first_name
+        description: "The user's first name."
+      - name: last_name
+        description: "The user's last name."
+      - name: email
+        description: "Email address for the user. Not guaranteed unique — see seeds/_seeds.yml. user_id is the person-grain uniqueness guarantee."
+        data_tests:
+          - not_null
+      - name: dob_date
+        description: "UTC timestamp string for the D.O.B."
+      - name: dob_age
+        description: "Age in whole years as returned by the source API at extraction time."
+        data_tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "= {{ age_in_years('dob_date') }}"
+              config:
+                severity: warn
+      - name: registered_date
+        description: "UTC timestamp string indicating when the user profile was created."
+      - name: registered_age
+        description: "Number of years the user has been registered with the database."
       - name: location_id
         description: "FK to dim_location."
         data_tests:
