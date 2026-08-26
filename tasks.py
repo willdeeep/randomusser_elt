@@ -1,6 +1,8 @@
 """Invoke tasks for the randomuser_elt project."""
 
+import csv as csv_lib
 import shlex
+import sqlite3
 import subprocess
 from pathlib import Path
 
@@ -13,6 +15,8 @@ ENV_FILE = ROOT / ".env"
 # Mirrors profiles.yml's schemas_and_paths.main -- not exposed via DbtSettings,
 # since that only covers where dbt_project.yml/profiles.yml themselves live.
 DB_PATH = ROOT / "dbt" / "data" / "randomuser.db"
+DEFAULT_RESULT_TABLE = "mart_recent_registrations_by_state"
+DIRECTORY_RESULT_TABLE = "mart_user_directory"
 
 
 def _run(args: list[str], *, ensure_db_dir: bool = True) -> None:
@@ -83,3 +87,40 @@ def build(c: Context) -> None:
 def reset_db(c: Context) -> None:
     """Delete the SQLite database file so the next seed/build starts completely fresh."""
     DB_PATH.unlink(missing_ok=True)
+
+
+@task(
+    help={
+        "directory": "Show mart_user_directory instead of the default recent-registrations report.",
+        "csv": "Write the report to <table>.csv in the repo root instead of printing it.",
+    }
+)
+def results(c: Context, directory: bool = False, csv: bool = False) -> None:
+    """Print one presentation-layer mart (run `invoke build` first)."""
+    table = DIRECTORY_RESULT_TABLE if directory else DEFAULT_RESULT_TABLE
+
+    connection = sqlite3.connect(DB_PATH)
+    connection.row_factory = sqlite3.Row
+    rows = connection.execute(f"select * from {table}").fetchall()
+    connection.close()
+
+    if csv:
+        csv_path = ROOT / f"{table}.csv"
+        with open(csv_path, "w", newline="") as f:
+            writer = csv_lib.writer(f)
+            if rows:
+                writer.writerow(rows[0].keys())
+                writer.writerows(rows)
+        print(f"Wrote {len(rows)} rows to {csv_path}")
+        return
+
+    print(f"\n=== {table} ({len(rows)} rows) ===")
+    if not rows:
+        print("(no rows)")
+        return
+    headers = rows[0].keys()
+    widths = [max(len(h), *(len(str(row[h])) for row in rows)) for h in headers]
+    print("  ".join(h.ljust(w) for h, w in zip(headers, widths, strict=True)))
+    for row in rows:
+        cells = [str(row[h]) for h in headers]
+        print("  ".join(c.ljust(w) for c, w in zip(cells, widths, strict=True)))

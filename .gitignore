@@ -24,5 +24,8 @@ dbt/target
 # Database
 dbt/data/randomuser.db
 
+# invoke results --csv output
+/mart_*.csv
+
 # Transient lists and plan files
 docs/*

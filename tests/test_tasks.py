@@ -9,6 +9,7 @@ calls straight through to the original function body -- so tasks are called
 directly here rather than via invoke's CLI runner.
 """
 
+import sqlite3
 import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -163,3 +164,75 @@ def test_reset_db_is_a_noop_when_file_already_missing(_isolated_db_path: Path) -
     assert not _isolated_db_path.exists()
 
     tasks.reset_db(CTX)  # must not raise
+
+
+@pytest.fixture
+def _results_db(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+    db_path = tmp_path / "test.db"
+    connection = sqlite3.connect(db_path)
+    connection.execute("create table mart_recent_registrations_by_state (state text, name text)")
+    connection.execute("insert into mart_recent_registrations_by_state values ('Ohio', 'Bob')")
+    connection.execute("create table mart_user_directory (name text, age int)")
+    connection.execute("insert into mart_user_directory values ('Alice', 30)")
+    connection.commit()
+    connection.close()
+    monkeypatch.setattr(tasks, "DB_PATH", db_path)
+    return db_path
+
+
+def test_results_defaults_to_recent_registrations_report(
+    _results_db: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    tasks.results(CTX)
+
+    out = capsys.readouterr().out
+    assert "mart_recent_registrations_by_state" in out
+    assert "Bob" in out
+    assert "mart_user_directory" not in out
+    assert "Alice" not in out
+
+
+def test_results_directory_flag_switches_report(
+    _results_db: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    tasks.results(CTX, directory=True)
+
+    out = capsys.readouterr().out
+    assert "mart_user_directory" in out
+    assert "Alice" in out
+    assert "Bob" not in out
+
+
+def test_results_reports_no_rows(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    db_path = tmp_path / "empty.db"
+    connection = sqlite3.connect(db_path)
+    connection.execute("create table mart_recent_registrations_by_state (state text)")
+    connection.commit()
+    connection.close()
+    monkeypatch.setattr(tasks, "DB_PATH", db_path)
+
+    tasks.results(CTX)
+
+    assert "(no rows)" in capsys.readouterr().out
+
+
+def test_results_csv_writes_file_instead_of_printing(
+    _results_db: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(tasks, "ROOT", tmp_path)
+
+    tasks.results(CTX, csv=True)
+
+    csv_path = tmp_path / "mart_recent_registrations_by_state.csv"
+    content = csv_path.read_text()
+    assert "state,name" in content
+    assert "Ohio,Bob" in content
+
+    out = capsys.readouterr().out
+    assert "Wrote 1 rows" in out
+    assert "===" not in out
