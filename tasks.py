@@ -6,20 +6,23 @@ from pathlib import Path
 
 from invoke import Context, task
 
+from randomuser_elt.config import load_dbt_settings
+
 ROOT = Path(__file__).parent
 ENV_FILE = ROOT / ".env"
-DBT_DIR = ROOT / "dbt"
 
 
 def _run(args: list[str]) -> None:
     """Run *args* from the repo root with ``.env`` auto-loaded; stream output, raise on failure."""
+    dbt_settings = load_dbt_settings()
+    project_dir = shlex.quote(str((ROOT / dbt_settings.project_dir).resolve()))
+    profiles_dir = shlex.quote(str((ROOT / dbt_settings.profiles_dir).resolve()))
     env_file = shlex.quote(str(ENV_FILE))
-    dbt_dir = shlex.quote(str(DBT_DIR))
     prefix = (
         f"set -a; [ -f {env_file} ] && . {env_file}; set +a; "
         # dbt clean compares DBT_PROJECT_DIR against resolved absolute paths, so a relative
         # value (as set in .env) makes it wrongly flag clean-targets as "outside the project".
-        f"export DBT_PROJECT_DIR={dbt_dir} DBT_PROFILES_DIR={dbt_dir}; "
+        f"export DBT_PROJECT_DIR={project_dir} DBT_PROFILES_DIR={profiles_dir}; "
     )
     subprocess.run(["bash", "-c", prefix + shlex.join(args)], cwd=ROOT, check=True)
 
