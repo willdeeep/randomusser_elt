@@ -15,8 +15,7 @@ ENV_FILE = ROOT / ".env"
 # Mirrors profiles.yml's schemas_and_paths.main -- not exposed via DbtSettings,
 # since that only covers where dbt_project.yml/profiles.yml themselves live.
 DB_PATH = ROOT / "dbt" / "data" / "randomuser.db"
-DEFAULT_RESULT_TABLE = "mart_recent_registrations_by_state"
-DIRECTORY_RESULT_TABLE = "mart_user_directory"
+RESULT_TABLE = "mart_recent_registrations_by_state"
 
 
 def _run(args: list[str], *, ensure_db_dir: bool = True) -> None:
@@ -89,15 +88,10 @@ def reset_db(c: Context) -> None:
     DB_PATH.unlink(missing_ok=True)
 
 
-@task(
-    help={
-        "directory": "Show mart_user_directory instead of the default recent-registrations report.",
-        "csv": "Write the report to <table>.csv in the repo root instead of printing it.",
-    }
-)
-def results(c: Context, directory: bool = False, csv: bool = False) -> None:
-    """Print one presentation-layer mart (run `invoke build` first)."""
-    table = DIRECTORY_RESULT_TABLE if directory else DEFAULT_RESULT_TABLE
+@task(help={"csv": "Write the report to <table>.csv in the repo root instead of printing it."})
+def results(c: Context, csv: bool = False) -> None:
+    """Print the recent-registrations-by-state mart (run `invoke build` first)."""
+    table = RESULT_TABLE
 
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row

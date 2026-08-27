@@ -172,15 +172,13 @@ def _results_db(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     connection = sqlite3.connect(db_path)
     connection.execute("create table mart_recent_registrations_by_state (state text, name text)")
     connection.execute("insert into mart_recent_registrations_by_state values ('Ohio', 'Bob')")
-    connection.execute("create table mart_user_directory (name text, age int)")
-    connection.execute("insert into mart_user_directory values ('Alice', 30)")
     connection.commit()
     connection.close()
     monkeypatch.setattr(tasks, "DB_PATH", db_path)
     return db_path
 
 
-def test_results_defaults_to_recent_registrations_report(
+def test_results_prints_recent_registrations_report(
     _results_db: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     tasks.results(CTX)
@@ -188,19 +186,6 @@ def test_results_defaults_to_recent_registrations_report(
     out = capsys.readouterr().out
     assert "mart_recent_registrations_by_state" in out
     assert "Bob" in out
-    assert "mart_user_directory" not in out
-    assert "Alice" not in out
-
-
-def test_results_directory_flag_switches_report(
-    _results_db: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    tasks.results(CTX, directory=True)
-
-    out = capsys.readouterr().out
-    assert "mart_user_directory" in out
-    assert "Alice" in out
-    assert "Bob" not in out
 
 
 def test_results_reports_no_rows(
