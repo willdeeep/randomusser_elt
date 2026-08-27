@@ -28,4 +28,4 @@ dbt/data/randomuser.db
 /mart_*.csv
 
 # Transient lists and plan files
-docs/*
+docs
